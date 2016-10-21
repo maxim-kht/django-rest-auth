@@ -1,3 +1,5 @@
+import inspect
+
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
@@ -52,7 +54,13 @@ class RegisterView(CreateAPIView):
         return Response(self.get_response_data(user), status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        user = serializer.save(self.request)
+        save_method_args = inspect.getargspec(serializer.save).args
+
+        if len(save_method_args) == 1:
+            user = serializer.save()
+        else:
+            user = serializer.save(self.request)
+
         if getattr(settings, 'REST_USE_JWT', False):
             self.token = jwt_encode(user)
         else:
