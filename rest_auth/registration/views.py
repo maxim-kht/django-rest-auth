@@ -54,6 +54,11 @@ class RegisterView(CreateAPIView):
         return Response(self.get_response_data(user), status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
+        # If someone is using a custom serializer instead of the
+        # django-rest-auth RegisterSerializer, its save() method might
+        # not accept extra arguments. If so, we should not pass a request
+        # object to it. we check the arg list of the current assigned
+        # serializer save method and choose to send our request.
         save_method_args = inspect.getargspec(serializer.save).args
 
         if len(save_method_args) == 1:
