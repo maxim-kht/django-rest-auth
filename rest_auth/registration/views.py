@@ -61,10 +61,10 @@ class RegisterView(CreateAPIView):
         # serializer save method and choose to send our request.
         save_method_args = inspect.getargspec(serializer.save).args
 
-        if len(save_method_args) == 1:
-            user = serializer.save()
+        if 'request' in save_method_args:
+            user = serializer.save(request=self.request)
         else:
-            user = serializer.save(self.request)
+            user = serializer.save()
 
         if getattr(settings, 'REST_USE_JWT', False):
             self.token = jwt_encode(user)
